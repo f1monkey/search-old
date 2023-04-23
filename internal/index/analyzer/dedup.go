@@ -1,14 +1,15 @@
-package schema
+package analyzer
 
-// NopFunc Does nothing
-func NopFunc() AnalyzerFunc {
-	return func(s []string) []string {
-		return s
-	}
+func init() {
+	defaultRegistry.register(Dedup, DedupFunc)
 }
 
+const (
+	Dedup Type = "dedup"
+)
+
 // DedupFunc leaves only the first copy of the token
-func DedupFunc() AnalyzerFunc {
+func DedupFunc(settings map[string]interface{}) (Func, error) {
 	return func(s []string) []string {
 		if len(s) == 0 || len(s) == 1 {
 			return s
@@ -25,5 +26,5 @@ func DedupFunc() AnalyzerFunc {
 		}
 
 		return result
-	}
+	}, nil
 }

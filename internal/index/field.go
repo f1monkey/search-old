@@ -1,4 +1,4 @@
-package schema
+package index
 
 import (
 	"context"
@@ -105,7 +105,7 @@ func validateFieldAnalyzers(t Type) validation.RuleWithContextFunc {
 			return nil
 		}
 
-		s := ctx.Value("schema").(Schema)
+		s := ctx.Value(ctxKeySchema).(Schema)
 		if _, ok := s.Analyzers[v]; !ok {
 			return errs.Errorf("unknown analyzer %q", v)
 		}

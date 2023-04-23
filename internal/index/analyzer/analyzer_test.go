@@ -1,4 +1,4 @@
-package schema
+package analyzer
 
 import (
 	"testing"
@@ -6,15 +6,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_GetFunc(t *testing.T) {
+func Test_Func(t *testing.T) {
 	t.Run("cannot get func by invalid analyzer type", func(t *testing.T) {
-		f, err := (Analyzer{}).GetFunc()
+		f, err := (Analyzer{}).Func()
 		require.Error(t, err)
 		require.Nil(t, f)
 	})
 
 	t.Run("can get func by valid analyzer type", func(t *testing.T) {
-		f, err := (Analyzer{Type: Nop}).GetFunc()
+		f, err := (Analyzer{Type: Nop}).Func()
 		require.NoError(t, err)
 		require.NotNil(t, f)
 	})

@@ -1,31 +1,21 @@
-package schema
+package analyzer
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/f1monkey/search/pkg/errs"
 )
 
-// TokenizerWhitespaceFunc splits string by whitespace characters (see strings.Fields)
-func TokenizerWhitespaceFunc() AnalyzerFunc {
-	return func(s []string) []string {
-		if len(s) == 0 {
-			return s
-		}
-
-		result := make([]string, 0, len(s))
-
-		for _, str := range s {
-			result = append(result, strings.Fields(str)...)
-		}
-
-		return result
-	}
+func init() {
+	defaultRegistry.register(TokenizerRegexp, TokenizerRegexpFunc)
 }
 
+const (
+	TokenizerRegexp Type = "regexp"
+)
+
 // TokenizerRegexpFunc splits string by regular expression
-func TokenizerRegexpFunc(settings map[string]interface{}) (AnalyzerFunc, error) {
+func TokenizerRegexpFunc(settings map[string]interface{}) (Func, error) {
 	var (
 		expression string
 		ok         bool

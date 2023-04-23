@@ -1,4 +1,4 @@
-package schema
+package index
 
 import (
 	"encoding/json"
@@ -9,13 +9,15 @@ import (
 	"github.com/invopop/validation"
 )
 
-func ValidateDoc(s Schema, source map[string]interface{}) error {
+type Source map[string]interface{}
+
+func ValidateDoc(s Schema, source Source) error {
 	rules := buildRules(s, source)
 
 	return rules.Validate(source)
 }
 
-func buildRules(s Schema, source map[string]interface{}) validation.MapRule {
+func buildRules(s Schema, source Source) validation.MapRule {
 	var rules []*validation.KeyRules
 
 	for name, f := range s.Fields {

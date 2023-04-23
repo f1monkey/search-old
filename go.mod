@@ -3,7 +3,8 @@ module github.com/f1monkey/search
 go 1.20
 
 require (
-	github.com/stretchr/testify v1.8.0
+	github.com/invopop/validation v0.3.0
+	github.com/stretchr/testify v1.8.1
 	go.uber.org/zap v1.24.0
 )
 

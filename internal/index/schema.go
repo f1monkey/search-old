@@ -1,19 +1,20 @@
-package schema
+package index
 
 import (
 	"context"
 	"fmt"
 	"regexp"
 
+	"github.com/f1monkey/search/internal/index/analyzer"
 	"github.com/invopop/validation"
 )
 
 type FieldAnalyzer struct {
-	Analyzers []Analyzer `json:"analyzers"`
+	Analyzers []analyzer.Analyzer `json:"analyzers"`
 }
 
-func (fa FieldAnalyzer) Build() (AnalyzerFunc, error) {
-	return Chain(fa.Analyzers)
+func (fa FieldAnalyzer) Build() (analyzer.Func, error) {
+	return analyzer.Chain(fa.Analyzers)
 }
 
 func (a FieldAnalyzer) Validate() error {
@@ -27,7 +28,7 @@ type Schema struct {
 	Fields    map[string]Field         `json:"fields"`
 }
 
-func New(fields map[string]Field, analyzers map[string]FieldAnalyzer) Schema {
+func NewSchema(fields map[string]Field, analyzers map[string]FieldAnalyzer) Schema {
 	return Schema{
 		Fields:    fields,
 		Analyzers: analyzers,
@@ -40,7 +41,7 @@ func (s Schema) ValidateDoc(doc map[string]interface{}) error {
 
 func (s Schema) Validate() error {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "schema", s)
+	ctx = context.WithValue(ctx, ctxKeySchema, s)
 
 	if err := validateKeys("fields", s.Fields); err != nil {
 		return err

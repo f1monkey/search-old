@@ -1,27 +1,10 @@
-package schema
+package analyzer
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
-
-func Test_TokenizerWhitespaceFunc(t *testing.T) {
-	t.Run("empty", func(t *testing.T) {
-		var data []string
-		result := TokenizerWhitespaceFunc()(data)
-		require.Equal(t, data, result)
-	})
-
-	t.Run("not empty", func(t *testing.T) {
-		data := []string{
-			"hello world",
-			"hello  world ",
-		}
-		result := TokenizerWhitespaceFunc()(data)
-		require.Equal(t, []string{"hello", "world", "hello", "world"}, result)
-	})
-}
 
 func Test_TokenizerRegexpFunc(t *testing.T) {
 	t.Run("must return error if extra keys provided", func(t *testing.T) {
