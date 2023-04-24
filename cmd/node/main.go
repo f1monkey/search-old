@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/f1monkey/search/internal/log"
+	"github.com/f1monkey/search/internal/node"
 	"github.com/spf13/viper"
 )
 
@@ -29,5 +30,17 @@ func main() {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	logger.Info("init") // @todo initialize app
+	node, err := node.New(ctx, logger)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := node.Start(ctx); err != nil {
+		panic(err)
+	}
+
+	<-ctx.Done()
+	if err := node.Stop(ctx); err != nil {
+		panic(err)
+	}
 }
