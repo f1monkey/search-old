@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"os"
 	"path"
 	"testing"
@@ -80,11 +81,11 @@ func Test_AOF_Delete(t *testing.T) {
 	})
 	t.Run("must delete element if found", func(t *testing.T) {
 		f := path.Join(t.TempDir(), "tmp.dat")
-		s, err := NewAOFFromPath[string, *testData](f)
+		s, err := NewAOFFromPath[string, testData](f)
 		require.NoError(t, err)
 
 		key := "key"
-		value := &testData{"value"}
+		value := testData{"value"}
 		require.NoError(t, s.Create(key, value))
 
 		err = s.Delete("key")
@@ -98,5 +99,45 @@ func Test_AOF_Delete(t *testing.T) {
 		)
 
 		require.Len(t, s.items, 0, "must delete element from map")
+	})
+}
+
+func Test_AOF_Init(t *testing.T) {
+	t.Run("must add all existing items to the map", func(t *testing.T) {
+		f := path.Join(t.TempDir(), "tmp.dat")
+
+		err := os.WriteFile(f, []byte(`{"key":"key","value":{"value":"value"}}
+{"key":"key2","value":{"value":"value2"}}`), 0600)
+		require.NoError(t, err)
+
+		s, err := NewAOFFromPath[string, testData](f)
+		require.NoError(t, err)
+
+		err = s.Init(context.Background())
+		require.NoError(t, err)
+
+		require.Contains(t, s.items, "key")
+		require.Equal(t, testData{Value: "value"}, s.items["key"])
+		require.Contains(t, s.items, "key2")
+		require.Equal(t, testData{Value: "value2"}, s.items["key2"])
+	})
+	t.Run("must remove items marked as deleted", func(t *testing.T) {
+		f := path.Join(t.TempDir(), "tmp.dat")
+
+		err := os.WriteFile(f, []byte(`{"key":"key","value":{"value":"value"}}
+{"key":"key2","value":{"value":"value2"}}
+{"key":"key","isDeleted":true}
+`), 0600)
+		require.NoError(t, err)
+
+		s, err := NewAOFFromPath[string, testData](f)
+		require.NoError(t, err)
+
+		err = s.Init(context.Background())
+		require.NoError(t, err)
+
+		require.NotContains(t, s.items, "key")
+		require.Contains(t, s.items, "key2")
+		require.Equal(t, testData{Value: "value2"}, s.items["key2"])
 	})
 }

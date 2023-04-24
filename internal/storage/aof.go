@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"bufio"
+	"context"
 	"encoding/json"
 	"os"
 	"sync"
@@ -33,6 +35,8 @@ func NewAOFFromPath[K comparable, V any](path string) (*AOF[K, V], error) {
 	if err != nil {
 		return nil, errs.Errorf("err open file %q: %w", path, err)
 	}
+
+	// @todo close file on app stop
 
 	return NewAOF[K, V](f), nil
 }
@@ -82,6 +86,43 @@ func (s *AOF[K, V]) Delete(key K) error {
 	}
 
 	return ErrNotFound
+}
+
+func (s *AOF[K, V]) Init(ctx context.Context) error {
+	scanner := bufio.NewScanner(s.file)
+
+	// // @todo implement to process long lines
+	// const maxCapacity int = 10000000000
+	// buf := make([]byte, maxCapacity)
+	// scanner.Buffer(buf, maxCapacity)
+
+	for scanner.Scan() {
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
+		}
+
+		v := aofData[K, V]{}
+		if err := json.Unmarshal(scanner.Bytes(), &v); err != nil {
+			// @todo handle corrupted data
+			return errs.Errorf("data unmarshal err: %w", err)
+		}
+		if v.IsDeleted {
+			delete(s.items, v.Key)
+		} else if v.Value == nil {
+			// @todo handle corrupted data
+			return errs.Errorf("got nil value for key #%v", v.Key)
+		} else {
+			s.items[v.Key] = *v.Value
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return errs.Errorf("init err: %w", err)
+	}
+
+	return nil
 }
 
 func (s *AOF[K, V]) writeData(dat aofData[K, V]) error {
