@@ -24,7 +24,7 @@ type indexStorage interface {
 func indexesHandler(logger *zap.Logger, storage indexStorage) func(chi.Router) {
 	return func(r chi.Router) {
 		r.Get("/", indexListHandler(logger, storage))
-		r.Get("/{index}", indexGetHandler(logger, storage))
+		r.Get("/{index}", indexGetHandler(usecase.NewIndexGet(storage.Get)))
 		r.Delete("/{index}", indexDeleteHandler(logger, storage))
 		r.Put("/{index}", indexCreateHandler(usecase.NewIndexCreate(logger, storage.Create)))
 	}
@@ -51,7 +51,7 @@ func indexCreateHandler(indexCreator *usecase.IndexCreate) http.HandlerFunc {
 
 		if err := indexCreator.Create(index); err != nil {
 			if errors.Is(err, storage.ErrAlreadyExists) {
-				writeSimpleError(w, http.StatusBadRequest, "index already exists")
+				writeSimpleError(w, http.StatusBadRequest, "Index already exists")
 				return
 			}
 
@@ -71,9 +71,30 @@ func indexDeleteHandler(logger *zap.Logger, storage indexStorage) http.HandlerFu
 	}
 }
 
-func indexGetHandler(logger *zap.Logger, storage indexStorage) http.HandlerFunc {
+func indexGetHandler(indexGetter *usecase.IndexGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// @todo
+		name := chi.URLParam(r, "index")
+
+		result, err := indexGetter.Get(name)
+		if err != nil {
+			if errors.Is(err, storage.ErrNotFound) {
+				writeSimpleError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+				return
+			}
+
+			handleErr(w, err)
+			return
+		}
+
+		data, err := json.Marshal(result)
+		if err != nil {
+			handleErr(w, errs.Errorf("index marshal err: %w", err))
+			return
+		}
+
+		setContentType(w)
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
 	}
 }
 
