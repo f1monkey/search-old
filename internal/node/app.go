@@ -38,7 +38,7 @@ func New(ctx context.Context, logger *zap.Logger) (*Node, error) {
 	}
 
 	mux := chi.NewMux()
-	mux.Route("/index", indexHandler(logger, indexStorage))
+	mux.Route("/indexes", indexesHandler(logger, indexStorage))
 
 	return &Node{
 		logger: logger,
