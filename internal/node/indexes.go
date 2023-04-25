@@ -25,7 +25,7 @@ func indexesHandler(logger *zap.Logger, storage indexStorage) func(chi.Router) {
 	return func(r chi.Router) {
 		r.Get("/", indexListHandler(logger, storage))
 		r.Get("/{index}", indexGetHandler(usecase.NewIndexGet(storage.Get)))
-		r.Delete("/{index}", indexDeleteHandler(logger, storage))
+		r.Delete("/{index}", indexDeleteHandler(usecase.NewIndexDelete(logger, storage.Delete)))
 		r.Put("/{index}", indexCreateHandler(usecase.NewIndexCreate(logger, storage.Create)))
 	}
 }
@@ -65,9 +65,22 @@ func indexCreateHandler(indexCreator *usecase.IndexCreate) http.HandlerFunc {
 	}
 }
 
-func indexDeleteHandler(logger *zap.Logger, storage indexStorage) http.HandlerFunc {
+func indexDeleteHandler(indexDeleter *usecase.IndexDelete) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// @todo
+		name := chi.URLParam(r, "index")
+
+		if err := indexDeleter.Delete(name); err != nil {
+			if errors.Is(err, storage.ErrNotFound) {
+				writeSimpleError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+				return
+			}
+
+			handleErr(w, err)
+			return
+		}
+
+		setContentType(w)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
