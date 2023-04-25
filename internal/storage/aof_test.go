@@ -102,6 +102,17 @@ func Test_AOF_Delete(t *testing.T) {
 	})
 }
 
+func Test_AOF_All(t *testing.T) {
+	f := path.Join(t.TempDir(), "tmp.dat")
+	s, err := NewAOFFromPath[string, testData](f)
+	require.NoError(t, err)
+
+	s.items["key"] = testData{Value: "value"}
+	s.items["key2"] = testData{Value: "value2"}
+
+	require.Equal(t, []testData{{Value: "value"}, {Value: "value2"}}, s.All())
+}
+
 func Test_AOF_Init(t *testing.T) {
 	t.Run("must add all existing items to the map", func(t *testing.T) {
 		f := path.Join(t.TempDir(), "tmp.dat")

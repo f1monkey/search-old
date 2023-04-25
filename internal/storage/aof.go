@@ -88,6 +88,18 @@ func (s *AOF[K, V]) Delete(key K) error {
 	return ErrNotFound
 }
 
+func (s *AOF[K, V]) All() []V {
+	s.mtx.RLock()
+	defer s.mtx.RUnlock()
+
+	result := make([]V, 0, len(s.items))
+	for _, item := range s.items {
+		result = append(result, item)
+	}
+
+	return result
+}
+
 func (s *AOF[K, V]) Init(ctx context.Context) error {
 	scanner := bufio.NewScanner(s.file)
 

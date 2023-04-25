@@ -62,6 +62,18 @@ func (s *File[K, V]) Delete(key K) error {
 	return ErrNotFound
 }
 
+func (s *File[K, V]) All() []V {
+	s.mtx.RLock()
+	defer s.mtx.RUnlock()
+
+	result := make([]V, 0, len(s.items))
+	for _, item := range s.items {
+		result = append(result, item)
+	}
+
+	return result
+}
+
 type fileData[K comparable, V any] struct {
 	Items map[K]V
 }

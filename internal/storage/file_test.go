@@ -79,3 +79,12 @@ func Test_File_Save(t *testing.T) {
 
 	require.EqualValues(t, s1.items, s2.items)
 }
+
+func Test_File_All(t *testing.T) {
+	s := NewFile[string, testData]()
+
+	s.items["key"] = testData{Value: "value"}
+	s.items["key2"] = testData{Value: "value2"}
+
+	require.Equal(t, []testData{{Value: "value"}, {Value: "value2"}}, s.All())
+}
