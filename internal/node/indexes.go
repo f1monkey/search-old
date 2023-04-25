@@ -23,7 +23,7 @@ type indexStorage interface {
 
 func indexesHandler(logger *zap.Logger, storage indexStorage) func(chi.Router) {
 	return func(r chi.Router) {
-		r.Get("/", indexListHandler(logger, storage))
+		r.Get("/", indexListHandler(usecase.NewIndexList(storage.All)))
 		r.Get("/{index}", indexGetHandler(usecase.NewIndexGet(storage.Get)))
 		r.Delete("/{index}", indexDeleteHandler(usecase.NewIndexDelete(logger, storage.Delete)))
 		r.Put("/{index}", indexCreateHandler(usecase.NewIndexCreate(logger, storage.Create)))
@@ -111,8 +111,22 @@ func indexGetHandler(indexGetter *usecase.IndexGetter) http.HandlerFunc {
 	}
 }
 
-func indexListHandler(logger *zap.Logger, storage indexStorage) http.HandlerFunc {
+type IndexListResponse struct {
+	Indexes []index.Index `json:"indexes"`
+}
+
+func indexListHandler(indexLister *usecase.IndexList) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// @todo
+		result := indexLister.List()
+
+		data, err := json.Marshal(IndexListResponse{Indexes: result})
+		if err != nil {
+			handleErr(w, errs.Errorf("indexes marshal err: %w", err))
+			return
+		}
+
+		setContentType(w)
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
 	}
 }
