@@ -2,6 +2,7 @@ package node
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
@@ -10,7 +11,7 @@ import (
 
 type errorResponse struct {
 	Message string               `json:"message"`
-	Errors  []errorResponseError `json:"errors"`
+	Errors  []errorResponseError `json:"errors,omitempty"`
 }
 
 type errorResponseError struct {
@@ -53,7 +54,11 @@ func handleErr(w http.ResponseWriter, err error) {
 		return
 	}
 
-	// @todo handle invalid json request errors
+	var se *json.SyntaxError
+	if errors.As(err, &se) {
+		writeSimpleError(w, http.StatusBadRequest, "Failed to parse request body as JSON")
+		return
+	}
 
 	log.Println(err) // @todo
 
