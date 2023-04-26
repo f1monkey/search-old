@@ -11,6 +11,7 @@ import (
 	"github.com/f1monkey/search/internal/usecase"
 	"github.com/f1monkey/search/pkg/errs"
 	"github.com/go-chi/chi/v5"
+	"github.com/invopop/validation"
 	"go.uber.org/zap"
 )
 
@@ -55,7 +56,11 @@ func indexCreateHandler(indexCreator *usecase.IndexCreate) http.HandlerFunc {
 				return
 			}
 
-			// @todo handle validation error
+			var ve validation.Errors
+			if errors.As(err, &ve) {
+				handleErr(w, newRequestValidationErr(ve))
+				return
+			}
 
 			handleErr(w, err)
 			return
