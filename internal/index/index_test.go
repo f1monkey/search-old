@@ -3,6 +3,7 @@ package index
 import (
 	"testing"
 
+	"github.com/f1monkey/search/internal/index/schema"
 	"github.com/invopop/validation"
 	"github.com/stretchr/testify/require"
 )
@@ -21,7 +22,7 @@ func Test_Index_Validate(t *testing.T) {
 	})
 
 	t.Run("must fail if schema is invalid", func(t *testing.T) {
-		i := Index{Name: "name", Schema: Schema{Fields: nil}}
+		i := Index{Name: "name", Schema: schema.Schema{Fields: nil}}
 		err := validation.Validate(i)
 		require.Error(t, err)
 	})
@@ -29,10 +30,10 @@ func Test_Index_Validate(t *testing.T) {
 	t.Run("must not fail if index is valid", func(t *testing.T) {
 		i := Index{
 			Name: "name",
-			Schema: Schema{
-				Fields: map[string]Field{
+			Schema: schema.Schema{
+				Fields: map[string]schema.Field{
 					"field": {
-						Type:     TypeBool,
+						Type:     schema.TypeBool,
 						Required: false,
 					},
 				},

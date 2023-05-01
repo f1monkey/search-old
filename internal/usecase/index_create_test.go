@@ -5,16 +5,17 @@ import (
 	"testing"
 
 	"github.com/f1monkey/search/internal/index"
+	"github.com/f1monkey/search/internal/index/schema"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_IndexCreate_Create(t *testing.T) {
 	validIndex := index.Index{
 		Name: "name",
-		Schema: index.Schema{
-			Fields: map[string]index.Field{
+		Schema: schema.Schema{
+			Fields: map[string]schema.Field{
 				"field": {
-					Type:     index.TypeBool,
+					Type:     schema.TypeBool,
 					Required: false,
 				},
 			},

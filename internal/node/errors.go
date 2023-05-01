@@ -60,7 +60,7 @@ func handleErr(w http.ResponseWriter, err error) {
 		return
 	}
 
-	log.Println(err) // @todo
+	log.Println(err) // @todo need error logging? if yes - use app logger here
 
 	writeSimpleError(
 		w,

@@ -1,10 +1,13 @@
 package index
 
-import "github.com/invopop/validation"
+import (
+	"github.com/f1monkey/search/internal/index/schema"
+	"github.com/invopop/validation"
+)
 
 type Index struct {
-	Name   string `json:"name"`
-	Schema Schema `json:"schema"`
+	Name   string        `json:"name"`
+	Schema schema.Schema `json:"schema"`
 }
 
 func (i Index) Validate() error {
