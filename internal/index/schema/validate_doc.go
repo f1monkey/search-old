@@ -5,7 +5,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/f1monkey/search/pkg/errs"
+	"github.com/f1monkey/errs"
 	"github.com/invopop/validation"
 )
 

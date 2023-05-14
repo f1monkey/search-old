@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/f1monkey/search/pkg/errs"
+	"github.com/f1monkey/errs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/buffer"
 	"go.uber.org/zap/zapcore"
